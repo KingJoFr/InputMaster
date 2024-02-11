@@ -1,0 +1,185 @@
+<!--<script>
+const url = "https://type.fit/api/quotes" ;
+
+
+async function Quote(url){
+try {
+	const response = await fetch(url);
+	const result = await response.json();
+	console.log('the result is',result);
+} catch (error) {
+	console.error(error);
+}
+}
+
+/* create an if else statement that compares the current time to initial time to see if 
+sufficient time has passed to call the api again for the random quotes. The api should only be called once per day.
+const d1 = Date();  86,400,000 millis in a day. so if d1 - d2 > 86,400,000 then fetch from api again.
+*/
+
+const theDate = Date.now();
+const millis = theDate;
+console.log('the date in millis',millis);
+/*Quote(url);*/
+</script>
+
+<p></p>
+-->
+
+<!-- about the formating for the form https://stackoverflow.com/questions/17275707/how-do-i-evenly-add-space-between-a-label-and-the-input-field-regardless-of-leng-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body{
+        font-size: 1.5vw;
+      }
+		.inputAppContainer {
+        border: 2px solid blue;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+		    width: 75%;
+		    height: 700px;
+		    margin: 10px auto;
+      }
+	  .formContainer {
+		    border: 2px solid pink;
+        display: grid;
+        margin: 0;
+        
+        height: auto;
+        width: 100%;
+
+      }
+      form {
+        
+		    border: 2px solid yellow;
+		    
+		    
+      }
+      .rxContainer {
+        margin: 0;
+        border: 2px solid black;
+        width: 100%;
+      }
+      .rxContainer p{
+        margin:0;
+        padding:0;
+      }
+      
+      label {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+      
+        line-height: 40px;
+        margin-bottom: 10px;
+      }
+      .formUnit {
+        margin: 50px auto;
+      }
+      
+      
+    .submit{
+      margin: 0 auto;
+      width: 50%;
+    }
+	  input{
+		height: 30px;
+    width: 73.5%;
+    line-height: 26px;
+    margin-left: 10px;
+	  }
+	  option{
+		height: 30px;
+	  }
+	  select{
+		  height: 40px;
+      width: 75%;
+      
+      margin-left: 10px;
+      }
+	  
+      /*.formInput{
+			border: 2px solid green;
+			margin: 5px;
+		}*/
+    
+    </style>
+  </head>
+  <body>
+    <div class="inputAppContainer">
+      <div class="formContainer">
+        <form class="formInput" action="#">
+          <div class="formUnit">
+            <label for="patient">Patient
+            <select class="patient" name="patient" id="lang">
+              <option value="blank">Please choose a patient</option>
+              <option value="Charli O">Charli Olivera 11-30-2020</option>
+              <option value="Aiden G">Aiden Garcia 12-01-2012</option>
+              <option value="Jon S">Jon Stewart 8-27-1949</option>
+            </select>
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="meds">Medication
+            <select class="meds" name="meds" id="meds" required>
+              <option>Please choose the medication</option>
+              <option value="Amlodipine 5">Amlodipine 5</option>
+              <option value="Gabapentin 100">Gabapentin 100</option>
+              <option value="Amoxicillin 500">Amoxicillin 500</option>
+            </select>
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="quantity">Quantity
+            <input type="text" value="0" name="quantity" />
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="Sig">Sig
+            <select class="sig" name="Sig" required>
+              <option>Take 1 by mouth daily</option>
+              <option>Take 1 by mouth twice daily</option>
+              <option>Take 2 by mouth daily with food</option>
+            </select>
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="dr">Provider
+            <select name="dr">
+              <option>Hawthorne, Nathaniel</option>
+              <option>Grant, Ullysess</option>
+              <option>Grant, Carrey</option>
+            </select>
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="NPI">NPI:
+            <input type="text" name="NPI" />
+            </label>
+          </div>
+          <div class="formUnit">
+            <label for="dea">DEA: 
+            <input type="text" name="dea" />
+            </label>
+          </div>
+          <input type="submit" value="Submit" class="submit" />
+        </form>
+      </div>
+
+      <div class="rxContainer">
+        <p>Patient: <%=nameList[1]['name']%></p><br />
+        <p>medication</p><br />
+        <p>quantity</p><br />
+        <p>sig</p><br />
+        <p>provider</p><br />
+        <p>npi</p><br />
+        <p>dea</p><br />
+      </div>
+    </div>
+  </body>
+</html>
