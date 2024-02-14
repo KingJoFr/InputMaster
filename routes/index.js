@@ -19,16 +19,41 @@ async function getNames(){
         const response2 = await response.json();
         //const randName = await JSON.stringify(response2);
         await RName.collection.insertOne(response2);
-        console.log('response2',response2);
+        //console.log('response2',response2);
         }
 }
 }
 getNames();
+
 router.get('/', async(req,res)=>{
     const nameList = await RName.find();
+    const message = 'everything looks good';
+    patientCheck = '';
+    //console.log('nameList',nameList);
+
+    res.render('index', {nameList, message, patientCheck});
+
+});
+
+router.post('/submit', async(req,res)=>{
+
+    // patient name check
+    const nameList= await RName.find();
+    const inputName = req.body.patient;
+    console.log('inputName',inputName)
+    let patientCheck = ''
+    console.log('patientcheck',nameList[1]['name'] != inputName)
+    if(nameList[1]['name'] != inputName){
+            //console.log('infirst if')
+         patientCheck = 'You got the wrong patient';
+    } else{
+       // console.log('in else')
+         patientCheck = 'You got the right patient';
+    }
+
+    //medication check
     
-    console.log('nameList',nameList);
-    res.render('index', {nameList});
+    res.render('index',{patientCheck, nameList});
 
 });
 

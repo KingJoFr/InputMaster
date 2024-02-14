@@ -3,8 +3,11 @@ const app = express();
 const expressLayouts = require('express-ejs-layouts');
 const mongoose = require('mongoose');
 const indexRouter = require('./routes/index');
-const connectDB = require('/home/kingjofr/Desktop/randNameProj/mydb.js');
+const connectDB = require('/home/kingjofr/Desktop/InputMaster/mydb.js');
 const dotenv = require('dotenv');
+
+app.use(express.urlencoded({extended: true}));
+app.use(express.json()) 
 dotenv.config();
 app.set('view engine','ejs');
 app.set('views', __dirname + '/views');

@@ -107,26 +107,39 @@ console.log('the date in millis',millis);
 			border: 2px solid green;
 			margin: 5px;
 		}*/
+    #nameError {
+  display: none;
+  font-size: 0.8em;
+}
+
+#nameError.visible {
+  display: block;
+}
+
+input.invalid {
+  border-color: red;
+}
     
     </style>
   </head>
   <body>
+    <p>the message,<%=patientCheck%></p>
     <div class="inputAppContainer">
       <div class="formContainer">
-        <form class="formInput" action="#">
+        <form class="formInput" action="/submit" method="POST">
           <div class="formUnit">
             <label for="patient">Patient
-            <select class="patient" name="patient" id="lang">
-              <option value="blank">Please choose a patient</option>
-              <option value="Charli O">Charli Olivera 11-30-2020</option>
-              <option value="Aiden G">Aiden Garcia 12-01-2012</option>
-              <option value="Jon S">Jon Stewart 8-27-1949</option>
+            <select class="patient" name="patient" id="patient" requiredd>
+              <option value="blank"></option>
+              <option value="Daciana Diaconu">Daciana Diaconu</option>
+              <option value="Aiden_G">Aiden Garcia 12-01-2012</option>
+              <option value="Jon_S">Jon Stewart 8-27-1949</option>
             </select>
             </label>
           </div>
           <div class="formUnit">
             <label for="meds">Medication
-            <select class="meds" name="meds" id="meds" required>
+            <select class="meds" name="meds" id="meds" >
               <option>Please choose the medication</option>
               <option value="Amlodipine 5">Amlodipine 5</option>
               <option value="Gabapentin 100">Gabapentin 100</option>
@@ -141,7 +154,7 @@ console.log('the date in millis',millis);
           </div>
           <div class="formUnit">
             <label for="Sig">Sig
-            <select class="sig" name="Sig" required>
+            <select class="sig" name="Sig" >
               <option>Take 1 by mouth daily</option>
               <option>Take 1 by mouth twice daily</option>
               <option>Take 2 by mouth daily with food</option>
@@ -167,12 +180,16 @@ console.log('the date in millis',millis);
             <input type="text" name="dea" />
             </label>
           </div>
-          <input type="submit" value="Submit" class="submit" />
+          <input type="submit" value="Submit" class="submit" id="submit"/>
+          <span role="alert" id="nameError" aria-hidden="true">
+            Please enter the patient
+          </span>
         </form>
       </div>
 
       <div class="rxContainer">
         <p>Patient: <%=nameList[1]['name']%></p><br />
+        <p>Birth Date:</p><br />
         <p>medication</p><br />
         <p>quantity</p><br />
         <p>sig</p><br />
@@ -181,5 +198,29 @@ console.log('the date in millis',millis);
         <p>dea</p><br />
       </div>
     </div>
+
   </body>
+  <script type ="text/javascript">
+   /* const submit = document.getElementById("submit");
+    console.log('inside script')
+    submit.addEventListener("click", validate);
+  
+    function validate(e) {
+      e.preventDefault();
+      console.log('inside validate function')
+      const patient = document.getElementById("patient");
+      let valid = true;
+      console.log('patient.value',patient.value)
+      if (patient.value=='blank') {
+        console.log('inside if statement')
+        const nameError = document.getElementById("nameError");
+        nameError.classList.add("visible");
+        patient.classList.add("invalid");
+        nameError.setAttribute("aria-hidden", false);
+        nameError.setAttribute("aria-invalid", true);
+    }
+    submit();
+    return valid;
+  }*/
+      </script>
 </html>
