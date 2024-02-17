@@ -119,7 +119,43 @@ console.log('the date in millis',millis);
 input.invalid {
   border-color: red;
 }
-    
+    /* all the autocomplete styles */
+  
+
+.autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+}
+
+
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+.autocomplete-active {
+  /*when navigating through the items using the arrow keys:*/
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
     </style>
   </head>
   <body>
@@ -129,22 +165,16 @@ input.invalid {
         <form class="formInput" action="/submit" method="POST">
           <div class="formUnit">
             <label for="patient">Patient
-            <select class="patient" name="patient" id="patient" requiredd>
-              <option value="blank"></option>
-              <option value="Daciana Diaconu">Daciana Diaconu</option>
-              <option value="Aiden_G">Aiden Garcia 12-01-2012</option>
-              <option value="Jon_S">Jon Stewart 8-27-1949</option>
-            </select>
+              <div class="autocomplete">
+                <input id="myInput" type="text" name="myCountry" >
+              </div>
             </label>
           </div>
           <div class="formUnit">
             <label for="meds">Medication
-            <select class="meds" name="meds" id="meds" >
-              <option>Please choose the medication</option>
-              <option value="Amlodipine 5">Amlodipine 5</option>
-              <option value="Gabapentin 100">Gabapentin 100</option>
-              <option value="Amoxicillin 500">Amoxicillin 500</option>
-            </select>
+              <div class="autocomplete">
+                <input id="meds" type="text" name="myCountry" >
+              </div>
             </label>
           </div>
           <div class="formUnit">
@@ -188,8 +218,8 @@ input.invalid {
       </div>
 
       <div class="rxContainer">
-        <p>Patient: <%=nameList[1]['name']%></p><br />
-        <p>Birth Date:</p><br />
+       <p>Patient: <%=nameList[icounter.icount]['name']%></p><br />
+        <p>Birth Date:<%=nameList[icounter.icount]['birthday']%></p><br />
         <p>medication</p><br />
         <p>quantity</p><br />
         <p>sig</p><br />
@@ -198,9 +228,152 @@ input.invalid {
         <p>dea</p><br />
       </div>
     </div>
+    <form action="/nextPT?_method=PUT" method="POST" id ="myform">
+      <input type="text" name = 'position_num' id = 'position' value = '<%= icounter.icount %>' >
+      <button type="submit" value ="next" class = 'button-48' onClick="beforeSub()" role="button">next</button>
 
+      
+    </form>
+  </form>
+
+  <form action="/reset?_method=PUT" method="POST" id = "resetForm">
+    <input type = 'text' id = 'reset' name = 'reset' value = 0>
+    <button type = 'submit' value="reset" class="button-48" >reset</button>
   </body>
   <script type ="text/javascript">
+    
+    function beforeSub(){
+            console.log('inside beforesub')
+      const myForm = document.getElementById('myform');
+            myForm.addEventListener('click', function(e){
+               
+                e.preventDefault();
+             
+                increment_i();
+                myForm.submit();
+            });
+        };
+     function increment_i(){
+           
+
+           position_num = document.getElementsByName('position_num')[0];
+           icounter = parseInt(position_num.value)
+           console.log('before increment', position_num.value)
+           position_num.value= icounter + 1
+           console.log('after increment',position_num.value)
+   }
+
+   const meds = JSON.parse('<%-JSON.stringify(medsList) %>')
+   console.log('meds',meds);
+
+   const names = JSON.parse('<%-JSON.stringify(nameList) %>');
+   var resultNames = [];
+
+
+
+for(var i in names){
+    resultNames.push(names[i].name);
+}
+    console.log( 'result is',resultNames);
+    console.log('result 1 is',resultNames[1]);
+   function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+              b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+      x[i].parentNode.removeChild(x[i]);
+    }
+  }
+}
+/*execute a function when someone clicks in the document:*/
+document.addEventListener("click", function (e) {
+    closeAllLists(e.target);
+});
+}
+autocomplete(document.getElementById("myInput"), resultNames);
+autocomplete(document.getElementById('meds'), meds);
    /* const submit = document.getElementById("submit");
     console.log('inside script')
     submit.addEventListener("click", validate);

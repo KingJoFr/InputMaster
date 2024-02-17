@@ -5,7 +5,9 @@ const mongoose = require('mongoose');
 const indexRouter = require('./routes/index');
 const connectDB = require('/home/kingjofr/Desktop/InputMaster/mydb.js');
 const dotenv = require('dotenv');
+const methodOverride = require('method-override');
 
+app.use(methodOverride('_method'))
 app.use(express.urlencoded({extended: true}));
 app.use(express.json()) 
 dotenv.config();

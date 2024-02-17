@@ -1,13 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose= require('mongoose');
+
+
 const Schema = mongoose.Schema;
-
-const InputCounter = new Schema(
-    {
-        count: {
+const ICounterSchema = new Schema({
+        icount: {
             type: Number,
-            required: false
+            requred: true
         }
-    }
-);
 
-module.exports = mongoose.model('InpCount', InputCounter);
+        
+    });
+
+module.exports = mongoose.model('ICounter', ICounterSchema);

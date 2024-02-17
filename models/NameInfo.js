@@ -6,6 +6,10 @@ const RandName = new Schema(
         name: {
             type: String,
             required: false
+        },
+        birth_data:{
+            type: Date,
+            required: false
         }
     }
 );
