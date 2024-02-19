@@ -62,13 +62,14 @@ console.log('the date in millis',millis);
 		    
       }
       .rxContainer {
+        padding-top: 45px;
         margin: 0;
         border: 2px solid black;
         width: 100%;
       }
       .rxContainer p{
         margin:0;
-        padding:0;
+        padding:12px;
       }
       
       label {
@@ -156,35 +157,41 @@ input.invalid {
   background-color: DodgerBlue !important;
   color: #ffffff;
 }
+.checker{
+  visibility:hidden;
+}
     </style>
   </head>
   <body>
-    <p>the message,<%=patientCheck%></p>
+    <p>pt check<%=patientCheck%></p>
+    <p>med check: <%=medCheck%></p>
     <div class="inputAppContainer">
       <div class="formContainer">
         <form class="formInput" action="/submit" method="POST">
           <div class="formUnit">
             <label for="patient">Patient
               <div class="autocomplete">
-                <input id="myInput" type="text" name="myCountry" >
+                <input id="patient" type="text" name="patient" >
               </div>
             </label>
+            <input type="text" class="checker" name="nameChecker" value="<%-nameList[icounter.icount]['name']%>" />
           </div>
           <div class="formUnit">
             <label for="meds">Medication
               <div class="autocomplete">
-                <input id="meds" type="text" name="myCountry" >
+                <input id="meds" type="text" name="inputMed" >
               </div>
             </label>
+            <input type="text" name='medChecker' class="checker" value="<%-medsList[medIndex] %>" />
           </div>
           <div class="formUnit">
             <label for="quantity">Quantity
-            <input type="text" value="0" name="quantity" />
+            <input id='quantity' type="text" value="0" name="quantity"  type="number"/>
             </label>
           </div>
           <div class="formUnit">
             <label for="Sig">Sig
-            <select class="sig" name="Sig" >
+            <select class="sig" name="Sig" id="Sig" >
               <option>Take 1 by mouth daily</option>
               <option>Take 1 by mouth twice daily</option>
               <option>Take 2 by mouth daily with food</option>
@@ -193,7 +200,7 @@ input.invalid {
           </div>
           <div class="formUnit">
             <label for="dr">Provider
-            <select name="dr">
+            <select name="dr" id="dr">
               <option>Hawthorne, Nathaniel</option>
               <option>Grant, Ullysess</option>
               <option>Grant, Carrey</option>
@@ -210,22 +217,24 @@ input.invalid {
             <input type="text" name="dea" />
             </label>
           </div>
-          <input type="submit" value="Submit" class="submit" id="submit"/>
-          <span role="alert" id="nameError" aria-hidden="true">
+          <input type="submit" value="Submit" class="submit" id="submit">
+         <!-- <span role="alert" id="nameError" aria-hidden="true">
             Please enter the patient
-          </span>
+          </span>-->
         </form>
+        
+        
       </div>
 
       <div class="rxContainer">
-       <p>Patient: <%=nameList[icounter.icount]['name']%></p><br />
-        <p>Birth Date:<%=nameList[icounter.icount]['birthday']%></p><br />
-        <p>medication</p><br />
-        <p>quantity</p><br />
-        <p>sig</p><br />
-        <p>provider</p><br />
-        <p>npi</p><br />
-        <p>dea</p><br />
+       <p>Patient: <%-nameList[icounter.icount]['name']%></p><br />
+        <!--<p>Birth Date:<%#=nameList[icounter.icount]['birthday']%></p><br />-->
+        <p>Medication: <%=medsList[medIndex] %></p><br />
+        <p>Quantity</p><br />
+        <p>Sig</p><br />
+        <p>Provider</p><br />
+        <p>NPI</p><br />
+        <p>DEA</p><br />
       </div>
     </div>
     <form action="/nextPT?_method=PUT" method="POST" id ="myform">
@@ -372,7 +381,7 @@ document.addEventListener("click", function (e) {
     closeAllLists(e.target);
 });
 }
-autocomplete(document.getElementById("myInput"), resultNames);
+autocomplete(document.getElementById("patient"), resultNames);
 autocomplete(document.getElementById('meds'), meds);
    /* const submit = document.getElementById("submit");
     console.log('inside script')

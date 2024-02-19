@@ -45,7 +45,19 @@ async function getNames(){
 }
 }
 getNames();
+async function getMedsList(){
+    const rawMeds = await Card.find();
+    let medsList = [];
+    for(let i in rawMeds){
+        medsList.push(rawMeds[i].brand)
+        medsList.push(rawMeds[i].generic);
 
+    }
+    return medsList
+}
+async function getRandMed(){
+    return Math.floor(Math.random()*200);
+}
 
 
 /*************get */
@@ -54,18 +66,15 @@ router.get('/', async(req,res)=>{
     //console.log('icounter',icounter)
     const nameList = await RName.find();
     const message = 'everything looks good';
+    let medCheck = ''
     patientCheck = '';
-    const rawMeds = await Card.find();
-    let medsList = [];
-    for(let i in rawMeds){
-        medsList.push(rawMeds[i].brand)
-        medsList.push(rawMeds[i].generic);
-
-    }
+    const medsList = await getMedsList();
+    const medIndex = await getRandMed()
+    console.log('medindex',medIndex);
     //console.log('meds',meds)
     //console.log('nameList',nameList);
 
-    res.render('index', {nameList, message, patientCheck,icounter,medsList});
+    res.render('index', {nameList, message, patientCheck,icounter,medsList,medIndex,medCheck});
 
 });
 
@@ -111,12 +120,20 @@ router.put('/nextPT', async(req,res)=>{
 router.post('/submit', async(req,res)=>{
 
     // patient name check
-    const nameList= await RName.find();
+    const medIndex =  await getRandMed()
+    const medsList =  await getMedsList();
+    console.log(medIndex, medsList)
+    const icounter = await ICounter.findOne({_id:icountID})
+    const nameList = await RName.find();
+    const inputMed = req.body.inputMed;
     const inputName = req.body.patient;
+    const medChecker = req.body.medChecker;
+    const nameChecker = req.body.nameChecker;
     //console.log('inputName',inputName)
     let patientCheck = ''
+    let medCheck = ''
     //console.log('patientcheck',nameList[1]['name'] != inputName)
-    if(nameList[1]['name'] != inputName){
+    if(inputName != nameChecker){
             //console.log('infirst if')
          patientCheck = 'You got the wrong patient';
     } else{
@@ -125,8 +142,14 @@ router.post('/submit', async(req,res)=>{
     }
 
     //medication check
+    if(inputMed != medChecker){
+
+        medCheck = 'You got the wrong med';
+    }else{
+        medCheck = 'You got the right med';
+    }
     
-    res.render('index',{patientCheck, nameList});
+    res.render('index',{patientCheck, nameList, medCheck,icounter,medsList,medIndex});
 
 });
 
