@@ -170,7 +170,7 @@ router.post('/submit', async(req,res)=>{
     // patient name check
     
    
-    const quantity = getQuantity();
+    const quantity = req.body.quantityChecker;
     const medIndex =  req.body.medIndex;
     const medsList =  await getMedsList();
     const icounter = await ICounter.findOne({_id:icountID})
@@ -183,7 +183,7 @@ router.post('/submit', async(req,res)=>{
     const inputPatient = req.body.patient;
     const inputQuantity = req.body.quantity;
     const inputSig = req.body.inputSig;
-    const inputProvider = req.body.provider;
+    const inputProvider = req.body.inputProvider;
     const inputNpi = req.body.inputNpi;
     const inputDea = req.body.inputDea;
     //checkers
@@ -192,7 +192,7 @@ router.post('/submit', async(req,res)=>{
     const quantityChecker=req.body.quantityChecker;
     const providerChecker =req.body.providerChecker;
     const sigChecker = req.body.sigChecker
-    const npiChecker = '10******'
+    const npiChecker = '10********'
     const deaChecker = 'TL*******'
     const sig = req.body.sigChecker
     
@@ -202,7 +202,7 @@ router.post('/submit', async(req,res)=>{
     const quantityCheckMessage = checker(inputQuantity, quantityChecker);
     const providerCheckMessage = checker(inputProvider, providerChecker);
     const sigCheckMessage = checker(inputSig, sigChecker )
-    const npiCheckMessage = checker(inputSig, npiChecker)
+    const npiCheckMessage = checker(inputNpi, npiChecker)
     const deaCheckMessage = checker(inputDea, deaChecker)
     
     

@@ -39,57 +39,48 @@ console.log('the date in millis',millis);
         font-size: 1.5vw;
       }
 		.inputAppContainer {
-        border: 2px solid blue;
-        display: grid;
         
-		    width: 95%;
+        display: flex;
+        flex-direction: rows;
+		    width: 100%;
 		    height: 800px;
-		    margin:0;
+		    margin:0 auto;
       }
 	  .formContainer {
-		    border: 2px solid pink;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        margin: 0 auto;
-        
+		    
+        display: flex;
+        flex-direction: rows;
         height: auto;
-        width: 75%;
+        width: 100%;
+        margin: 20px;
 
       }
-      form {
-        
-		    border: 2px solid yellow;
-		    
-		    
-      }
-      .rxContainer {
+
+    .rxContainer {
         padding-top: 45px;
-        margin: 0;
-        border: 2px solid black;
-        width: 100%;
+        margin: 0 auto;
+        
+        width: 50%;
       }
-      .rxContainer p{
+    .rxContainer p{
         margin:0;
         padding:12px;
       }
       
-      label {
+    label {
         display: grid;
         grid-template-columns: 1fr 2fr;
       
         line-height: 40px;
         margin-bottom: 10px;
       }
-      .formUnit {
+    .formUnit {
         margin: 50px auto;
         
       }
       
       
-    .submit{
-      margin: 0 auto;
-      width: 50%;
-    }
+    
 	  input{
 		height: 30px;
     width: 73.5%;
@@ -106,10 +97,10 @@ console.log('the date in millis',millis);
       margin-left: 10px;
       }
 	  
-      /*.formInput{
-			border: 2px solid green;
-			margin: 5px;
-		}*/
+      .formInput{
+			width: 50%;
+			margin: 0 auto;
+		}
     #nameError {
   display: none;
   font-size: 0.8em;
@@ -176,12 +167,35 @@ input.invalid {
 }
 .allChecks p{
   flex: 33%;
-  padding: 20px;
-  margin: 10px;
+  padding: 5px;
+  margin: 5px;
+  width: 100%;
+  
+}
+#position, #reset{
+  display: none;
+}
+
+.submitctn{
+  width: 100%;
+  display: flex;
+  
+  
+}
+.submitbtn{
+      
+      margin: 0 auto;
+      width: 50%;
+      
+      
+    }
+.formbtns{
+  width: 100%;
 }
     </style>
   </head>
   <body>
+    <center><h1>Input Master v0.5</h1></center>
     <div class="allChecks">
     <p>pt check: <%=patientCheckMessage%></p>
     <p>med check: <%=medCheckMessage%></p>
@@ -193,7 +207,7 @@ input.invalid {
     </div>
     <div class="inputAppContainer">
       <div class="formContainer">
-        <form class="formInput" action="/submit" method="POST">
+        <form class="formInput" action="/submit" method="POST" id="formInput">
           <div class="formUnit">
             <label for="patient">Patient
               <div class="autocomplete">
@@ -228,7 +242,9 @@ input.invalid {
             <label for="inputProvider">Provider
               <div class="autocomplete">
                 <input id="inputProvider" type="text" name="inputProvider" >
+                </div>
             </label>
+            
           </div>
           <div class="formUnit">
             <label for="npi">NPI:
@@ -240,9 +256,7 @@ input.invalid {
             <input type="text" name="inputDea" />
             </label>
           </div>
-          
-          <input type="submit" value="Submit" class="submit" id="submit">
-
+         
           <input type="text" name='medChecker' class="checker" value="<%-medsList[medIndex] %>" />
           <input type="text" class="checker" name="nameChecker" value="<%-nameList[icounter.icount]['name']%>" />
           <input type="number" class="checker" name="medIndex" value="<%-medIndex%>" />
@@ -253,26 +267,35 @@ input.invalid {
 
          
         </form>
+        
+        <div class="rxContainer">
+          <p>Patient: <%-nameList[icounter.icount]['name']%></p><br />
+           <!--<p>Birth Date:<%#=nameList[icounter.icount]['birthday']%></p><br />-->
+           <p>Medication: <%=medsList[medIndex] %></p><br />
+           <p >Quantity: <%=quantity%></p><br />
+           <p>Sig: <%=sig%></p><br />
+           <p>Provider: <%=nameList[providerIndex]['name']%></p><br />
+           <p>NPI: 10********</p><br />
+           <p>DEA: TL*******</p><br />
+           <div class="submitctn">
+              <form action="/nextPT?_method=PUT" method="POST" id ="myform" class="formbtns">
+                 <input type="text" name = 'position_num' id = 'position' value = '<%= icounter.icount %>' />
+                 <button type="submit" value ="next" class = 'button-48 submitbtn' onClick="beforeSub()" role="button">next</button>
+              </form>
+              <form action="/reset?_method=PUT" method="POST" id = "resetForm" class="formbtns">
+                 <input type = 'text' id = 'reset' name = 'reset' value = 0 />
+                 <button type = 'submit' value="reset" class="button-48 submitbtn" >reset</button>
+              </form>
+              <div class ='formbtns'>
+                 <input type="submit" value="Submit" class="submitbtn" id="submit" form="formInput">
+              </div>
+            </div>
+        </div>
+           
+         
       </div>
 
-      <div class="rxContainer">
-       <p>Patient: <%-nameList[icounter.icount]['name']%></p><br />
-        <!--<p>Birth Date:<%#=nameList[icounter.icount]['birthday']%></p><br />-->
-        <p>Medication: <%=medsList[medIndex] %></p><br />
-        <p >Quantity: <%=quantity%></p><br />
-        <p>Sig: <%=sig%></p><br />
-        <p>Provider: <%=nameList[providerIndex]['name']%></p><br />
-        <p>NPI: 10********</p><br />
-        <p>DEA: TL*******</p><br />
-        <form action="/nextPT?_method=PUT" method="POST" id ="myform">
-          <input type="text" name = 'position_num' id = 'position' value = '<%= icounter.icount %>' >
-          <button type="submit" value ="next" class = 'button-48' onClick="beforeSub()" role="button">next</button>
-        </form>
-        <form action="/reset?_method=PUT" method="POST" id = "resetForm">
-          <input type = 'text' id = 'reset' name = 'reset' value = 0>
-          <button type = 'submit' value="reset" class="button-48" >reset</button>
-        </form>
-      </div>
+      
     </div>
 
     
