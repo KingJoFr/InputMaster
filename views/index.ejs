@@ -41,18 +41,19 @@ console.log('the date in millis',millis);
 		.inputAppContainer {
         border: 2px solid blue;
         display: grid;
-        grid-template-columns: 1fr 1fr;
-		    width: 75%;
-		    height: 700px;
-		    margin: 10px auto;
+        
+		    width: 95%;
+		    height: 800px;
+		    margin:0;
       }
 	  .formContainer {
 		    border: 2px solid pink;
         display: grid;
-        margin: 0;
+        grid-template-columns: 1fr 1fr;
+        margin: 0 auto;
         
         height: auto;
-        width: 100%;
+        width: 75%;
 
       }
       form {
@@ -81,6 +82,7 @@ console.log('the date in millis',millis);
       }
       .formUnit {
         margin: 50px auto;
+        
       }
       
       
@@ -143,7 +145,7 @@ input.invalid {
   right: 0;
 }
 .autocomplete-items div {
-  padding: 10px;
+  
   cursor: pointer;
   background-color: #fff;
   border-bottom: 1px solid #d4d4d4;
@@ -159,12 +161,36 @@ input.invalid {
 }
 .checker{
   visibility:hidden;
+  display:none;
+  
+}
+.use{
+  float: right;
+}
+.allChecks{
+  
+  margin: 0 auto;
+  display:flex;
+  
+
+}
+.allChecks p{
+  flex: 33%;
+  padding: 20px;
+  margin: 10px;
 }
     </style>
   </head>
   <body>
-    <p>pt check<%=patientCheck%></p>
-    <p>med check: <%=medCheck%></p>
+    <div class="allChecks">
+    <p>pt check: <%=patientCheckMessage%></p>
+    <p>med check: <%=medCheckMessage%></p>
+    <p>quantity check: <%=quantityCheckMessage%></p>
+    <p>sig check: <%=sigCheckMessage%></p>
+    <p>provider check: <%=providerCheckMessage%></p>
+    <p>npi check: <%=npiCheckMessage%></p>
+    <p>dea check: <%=deaCheckMessage%></p>
+    </div>
     <div class="inputAppContainer">
       <div class="formContainer">
         <form class="formInput" action="/submit" method="POST">
@@ -174,7 +200,7 @@ input.invalid {
                 <input id="patient" type="text" name="patient" >
               </div>
             </label>
-            <input type="text" class="checker" name="nameChecker" value="<%-nameList[icounter.icount]['name']%>" />
+            
           </div>
           <div class="formUnit">
             <label for="meds">Medication
@@ -182,7 +208,7 @@ input.invalid {
                 <input id="meds" type="text" name="inputMed" >
               </div>
             </label>
-            <input type="text" name='medChecker' class="checker" value="<%-medsList[medIndex] %>" />
+            
           </div>
           <div class="formUnit">
             <label for="quantity">Quantity
@@ -190,64 +216,69 @@ input.invalid {
             </label>
           </div>
           <div class="formUnit">
-            <label for="Sig">Sig
-            <select class="sig" name="Sig" id="Sig" >
+            <label for="inputSig">Sig
+            <select class="inputSig" name="inputSig" id="inputSig" >
               <option>Take 1 by mouth daily</option>
               <option>Take 1 by mouth twice daily</option>
-              <option>Take 2 by mouth daily with food</option>
+              
             </select>
             </label>
           </div>
           <div class="formUnit">
-            <label for="dr">Provider
-            <select name="dr" id="dr">
-              <option>Hawthorne, Nathaniel</option>
-              <option>Grant, Ullysess</option>
-              <option>Grant, Carrey</option>
-            </select>
+            <label for="inputProvider">Provider
+              <div class="autocomplete">
+                <input id="inputProvider" type="text" name="inputProvider" >
             </label>
           </div>
           <div class="formUnit">
-            <label for="NPI">NPI:
-            <input type="text" name="NPI" />
+            <label for="npi">NPI:
+            <input type="text" name="inputNpi" />
             </label>
           </div>
           <div class="formUnit">
             <label for="dea">DEA: 
-            <input type="text" name="dea" />
+            <input type="text" name="inputDea" />
             </label>
           </div>
+          
           <input type="submit" value="Submit" class="submit" id="submit">
-         <!-- <span role="alert" id="nameError" aria-hidden="true">
-            Please enter the patient
-          </span>-->
+
+          <input type="text" name='medChecker' class="checker" value="<%-medsList[medIndex] %>" />
+          <input type="text" class="checker" name="nameChecker" value="<%-nameList[icounter.icount]['name']%>" />
+          <input type="number" class="checker" name="medIndex" value="<%-medIndex%>" />
+          <input type="number" class="checker" name="quantityChecker" value="<%=quantity%>" />
+          <input type="text" class="checker" name="sigChecker" value="<%=sig%>" />
+          <input type="text" class="checker" name="providerChecker" value="<%=nameList[providerIndex]['name']%>" />
+          <input type="number" class="checker" name="providerIndex" value="<%=providerIndex%>" />
+
+         
         </form>
-        
-        
       </div>
 
       <div class="rxContainer">
        <p>Patient: <%-nameList[icounter.icount]['name']%></p><br />
         <!--<p>Birth Date:<%#=nameList[icounter.icount]['birthday']%></p><br />-->
         <p>Medication: <%=medsList[medIndex] %></p><br />
-        <p>Quantity</p><br />
-        <p>Sig</p><br />
-        <p>Provider</p><br />
-        <p>NPI</p><br />
-        <p>DEA</p><br />
+        <p >Quantity: <%=quantity%></p><br />
+        <p>Sig: <%=sig%></p><br />
+        <p>Provider: <%=nameList[providerIndex]['name']%></p><br />
+        <p>NPI: 10********</p><br />
+        <p>DEA: TL*******</p><br />
+        <form action="/nextPT?_method=PUT" method="POST" id ="myform">
+          <input type="text" name = 'position_num' id = 'position' value = '<%= icounter.icount %>' >
+          <button type="submit" value ="next" class = 'button-48' onClick="beforeSub()" role="button">next</button>
+        </form>
+        <form action="/reset?_method=PUT" method="POST" id = "resetForm">
+          <input type = 'text' id = 'reset' name = 'reset' value = 0>
+          <button type = 'submit' value="reset" class="button-48" >reset</button>
+        </form>
       </div>
     </div>
-    <form action="/nextPT?_method=PUT" method="POST" id ="myform">
-      <input type="text" name = 'position_num' id = 'position' value = '<%= icounter.icount %>' >
-      <button type="submit" value ="next" class = 'button-48' onClick="beforeSub()" role="button">next</button>
 
-      
-    </form>
-  </form>
+    
+  
 
-  <form action="/reset?_method=PUT" method="POST" id = "resetForm">
-    <input type = 'text' id = 'reset' name = 'reset' value = 0>
-    <button type = 'submit' value="reset" class="button-48" >reset</button>
+  
   </body>
   <script type ="text/javascript">
     
@@ -285,7 +316,8 @@ for(var i in names){
 }
     console.log( 'result is',resultNames);
     console.log('result 1 is',resultNames[1]);
-   function autocomplete(inp, arr) {
+
+function autocomplete(inp, arr) {
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
@@ -383,6 +415,7 @@ document.addEventListener("click", function (e) {
 }
 autocomplete(document.getElementById("patient"), resultNames);
 autocomplete(document.getElementById('meds'), meds);
+autocomplete(document.getElementById('inputProvider'), resultNames)
    /* const submit = document.getElementById("submit");
     console.log('inside script')
     submit.addEventListener("click", validate);

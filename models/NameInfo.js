@@ -7,7 +7,7 @@ const RandName = new Schema(
             type: String,
             required: false
         },
-        birth_data:{
+        birthday:{
             type: Date,
             required: false
         }

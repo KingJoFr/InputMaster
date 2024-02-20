@@ -5,8 +5,15 @@ const ICounter = require('../models/InputCounter')
 const Card = require('../models/Card') 
 
 global.icountID = "65d139f1e58ab4e79d03e7c1"
+global.sigList = [
+    'Take 1 by mouth once daily',
+    'Take 1 by mouth twice daily',
+]
 
-
+function getSig(){
+    sindex = getRandNum(sigList.length);
+    return sigList[sindex];
+}
 async function getNames(){
     const nameLimit = 7 //how many random names you want in the list
 
@@ -55,26 +62,67 @@ async function getMedsList(){
     }
     return medsList
 }
-async function getRandMed(){
-    return Math.floor(Math.random()*200);
+function getQuantity(){
+    const quantityIndex = getRandNum(3);
+    const quantities = [30, 60, 90,180];
+    return quantities[quantityIndex];
+}
+function getRandNum(num){
+    return Math.floor(Math.random()*num);
+}
+function checker(input, checker){
+    if (input == checker){
+        return 'pass'
+    }else{
+        return 'fail'
+    }
 }
 
 
 /*************get */
 router.get('/', async(req,res)=>{
+
+    //check messages
+    const  npiCheckMessage =''
+    const  deaCheckMessage ='' 
+    const quantityCheckMessage =''
+    const providerCheckMessage =''
+    const sigCheckMessage='' 
+    const medCheckMessage = ''
+    const patientCheckMessage = '';
+
+    const quantity = getQuantity();
     const icounter = await ICounter.findOne({_id:icountID});
     //console.log('icounter',icounter)
     const nameList = await RName.find();
-    const message = 'everything looks good';
-    let medCheck = ''
-    patientCheck = '';
+    const message = 'everything looks good so far';
+    
     const medsList = await getMedsList();
-    const medIndex = await getRandMed()
+    const medIndex = getRandNum(400) // 400 because the list contains 400 names of meds
+    const sig = getSig();
+    const providerIndex = getRandNum(7);
     console.log('medindex',medIndex);
     //console.log('meds',meds)
     //console.log('nameList',nameList);
 
-    res.render('index', {nameList, message, patientCheck,icounter,medsList,medIndex,medCheck});
+    res.render('index', {
+        nameList, 
+        message, 
+        patientCheckMessage,
+        icounter,
+        medsList,
+        medIndex,
+        medCheckMessage,
+        quantity,
+        sig,
+        providerIndex,
+        npiCheckMessage,
+        deaCheckMessage,
+        patientCheckMessage,
+        quantityCheckMessage,
+        providerCheckMessage,
+        sigCheckMessage, 
+    });
 
 });
 
@@ -120,36 +168,66 @@ router.put('/nextPT', async(req,res)=>{
 router.post('/submit', async(req,res)=>{
 
     // patient name check
-    const medIndex =  await getRandMed()
+    
+   
+    const quantity = getQuantity();
+    const medIndex =  req.body.medIndex;
     const medsList =  await getMedsList();
-    console.log(medIndex, medsList)
     const icounter = await ICounter.findOne({_id:icountID})
     const nameList = await RName.find();
+    const providerIndex = req.body.providerIndex;
+    console.log('req.body.providerIndex',providerIndex)
+
+    //form inputs
     const inputMed = req.body.inputMed;
-    const inputName = req.body.patient;
+    const inputPatient = req.body.patient;
+    const inputQuantity = req.body.quantity;
+    const inputSig = req.body.inputSig;
+    const inputProvider = req.body.provider;
+    const inputNpi = req.body.inputNpi;
+    const inputDea = req.body.inputDea;
+    //checkers
     const medChecker = req.body.medChecker;
-    const nameChecker = req.body.nameChecker;
-    //console.log('inputName',inputName)
-    let patientCheck = ''
-    let medCheck = ''
-    //console.log('patientcheck',nameList[1]['name'] != inputName)
-    if(inputName != nameChecker){
-            //console.log('infirst if')
-         patientCheck = 'You got the wrong patient';
-    } else{
-       // console.log('in else')
-         patientCheck = 'You got the right patient';
-    }
+    const patientChecker = req.body.nameChecker;
+    const quantityChecker=req.body.quantityChecker;
+    const providerChecker =req.body.providerChecker;
+    const sigChecker = req.body.sigChecker
+    const npiChecker = '10******'
+    const deaChecker = 'TL*******'
+    const sig = req.body.sigChecker
+    
+    //check messages
+    const patientCheckMessage = checker(inputPatient, patientChecker)
+    const medCheckMessage = checker(inputMed,medChecker)
+    const quantityCheckMessage = checker(inputQuantity, quantityChecker);
+    const providerCheckMessage = checker(inputProvider, providerChecker);
+    const sigCheckMessage = checker(inputSig, sigChecker )
+    const npiCheckMessage = checker(inputSig, npiChecker)
+    const deaCheckMessage = checker(inputDea, deaChecker)
+    
+    
 
     //medication check
-    if(inputMed != medChecker){
+   
 
-        medCheck = 'You got the wrong med';
-    }else{
-        medCheck = 'You got the right med';
-    }
     
-    res.render('index',{patientCheck, nameList, medCheck,icounter,medsList,medIndex});
+    
+    res.render('index',{
+        npiCheckMessage,
+        deaCheckMessage,
+        patientCheckMessage,
+        quantityCheckMessage,
+        providerCheckMessage,
+        sigCheckMessage, 
+        nameList, 
+        medCheckMessage,
+        icounter,
+        medsList,
+        medIndex, 
+        quantity,
+        sig, 
+        providerIndex
+    });
 
 });
 
