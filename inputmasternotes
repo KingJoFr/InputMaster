@@ -1,0 +1,6 @@
+so to create the new deck with the new schema.
+take the old schema
+search for each brand name in open fda
+save that object in a new deck called detailedCard
+then call the bits I need from each to construct a new object
+Take that object and add it to a new deck called mergedCard
