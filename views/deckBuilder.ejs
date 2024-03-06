@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        form{
+            
+            width: 50%;
+            margin: 0 auto;
+        }
+        label{
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+      
+        line-height: 40px;
+        margin-bottom: 10px;
+    }
+    </style>
+</head>
+
+<!--endpoint?_method=PUT for updating-->
+
+<!--To do mar 6. can now submit form so now need to create the put route to update the card info from the form inputs-->
+<body>
+    <a href="/">home</a>
+   <center> <h1>deckBuilder</h1></center>
+    <form id="myForm" name="myForm" method="POST" action="/deckBuilderSubmit">  
+        <button type="submit" id ='submitbtn' action="/deckBuilderSubmit" method='POST' form="myForm">submit</button>
+    </form>
+    <button id ="nextbtn">next</button>
+    
+</body>
+
+
+<script type="text/javascript">
+   // const cardDeck = JSON.parse('<%#-JSON.stringify(cards) %>')
+   sessionStorage.setItem('count',0);
+    let counter = parseInt(sessionStorage.getItem('count'), 10);
+    console.log('counter',typeof(counter), counter )
+
+  
+
+   async function fillForm(){
+   
+
+    const response = await fetch('http://localhost:3000/deckBuilderData')
+    const cardDeck = await response.json();
+    console.log('counter,',counter)
+    const card = cardDeck[counter];
+
+    
+    
+    
+    const len = Object.keys(card).length;
+    let mForm = document.getElementById("myForm");
+    let inputRemove = document.querySelectorAll('label');
+    let brRemove = document.querySelectorAll('br');
+    
+    if(inputRemove){
+        for(let element of inputRemove)
+        element.remove();
+    };
+    if(brRemove){
+        for(let element of brRemove){
+            element.remove();
+        }
+    }
+    for(let i = 1; i<len -1; i++){
+      let lineBreak = document.createElement('br');
+      let gen = document.createElement('input');
+      let genLabel = document.createElement('label');
+      let key = Object.keys(card)[i];
+      let val = Object.values(card)[i];
+      gen.setAttribute('type','text')
+      gen.setAttribute('placeholder',val)
+      gen.setAttribute('name',key)
+      console.log('key is ', key)
+      genLabel.textContent = key;
+      genLabel.appendChild(gen)
+      mForm.appendChild(genLabel);
+      mForm.appendChild(lineBreak);
+       
+    }
+   
+   }
+   document.getElementById('submitbtn').onclick = function(){
+        let mForm = document.getElementById('myForm');
+        mForm.submit();
+   }
+   document.getElementById('nextbtn').onclick = function(){
+        counter = parseInt(sessionStorage.getItem('count'), 10)
+        sessionStorage.setItem('count', counter + 1);
+        console.log('counter',counter)
+        fillForm();
+   }
+ 
+fillForm();
+</script>
+</html>
