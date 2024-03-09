@@ -8,15 +8,12 @@ const MergedDeck = require('../models/MergedDeck');
 
 
 global.icountID = "65d139f1e58ab4e79d03e7c1"
-global.sigList = [
-    'Take 1 by mouth once daily',
-    'Take 1 by mouth twice daily',
-]
+
 
 //about switch statements and logical OR https://stackoverflow.com/questions/6476994/using-or-operator-in-javascript-switch-statement
 async function getAction(card){
     //issue to resolve here. I'm getting temp sometimes.
-    console.log('in get action', card);
+
     switch(card.form){
         case 'TABLET':
         case 'CAPSULE':
@@ -34,6 +31,9 @@ async function getAction(card){
         case 'PATCH':
         case 'CREAM':
         case 'OINTMENT':
+        case 'GEL':
+        case 'PUMP(S)':
+        case 'WASH(ES)':
             action = 'Apply';
             return action;
         case 'DROP(S)':
@@ -46,7 +46,7 @@ async function getAction(card){
     return action;
 }
 async function getTimePeriod(card){
-    console.log('in gettimeperiod', card)
+    
     // issue to resolve here. I'm only getting per week and every other day. per day is not comming up. also that should be more common
     switch(card.form){
         case 'TABLET':
@@ -54,7 +54,7 @@ async function getTimePeriod(card){
             periodList = ["per day","every other day","per week"]
             break;
         case 'SYRINGE':
-            periodList = ["per day","per week","per month"]
+            periodList = ["per week","per month"]
             break;
         case 'SPRAY(S)':
         case 'PUFF(S)': 
@@ -62,12 +62,13 @@ async function getTimePeriod(card){
         case 'CREAM':
         case 'OINTMENT':
         case 'DROP(S)':
+        case '.':
             periodList = ['per day']
         default:
             periodList=['temp'];
          
     }
-    let randIndex = getRandNum(periodList.length);
+    let randIndex = getRandNum(periodList.length,Math.round(Math.random()));
     return periodList[randIndex];
     
 }
@@ -75,16 +76,24 @@ async function createSig(card){
     /**
      * how to create the sig.  Pull the id from req.body._id. get route and form
      * a sig is basically action + quantity + med.form + "by/" + med.route + rate + "time(s) per" + time period
-     */
-    console.log("in createSig", card)
+     * how can I improve the sig?  There are a number of medications that have a unique sig. Azithromycin for
+     * instance.  9/10 times it's going to be 2 day 1 then 1 a day.  I could possible add a sig property 
+     * to certain medications then check if they have a sig during sig creation.  Another thing is quantities
+     * can be different depending on the type of medicine. For instance insulin could be 10,15, 20. units a day, 
+     * while pills will be 1,2,3,4 a day or 2 times a day or whatever. but basically what I'm trying to say 
+     * is they can't pull from the same array of quantities. I could probably use the form or route to decide which 
+     * array of quantities to pull from.*/
+  
     let action = await getAction(card);
     let quantity = 1;
     let form = card.form;
     let route = card.route;
     let rate = 1
     let timePeriod = await getTimePeriod(card);
-    const sigString = `${action}  ${quantity}  ${form} by ${route}  ${rate} times ${timePeriod}`
-    
+    const sigString = `${action} ${quantity} ${form} ${route} ${rate} time(s) ${timePeriod}`
+    if(action=='temp' || timePeriod =='temp'){
+        console.log('we have temps and card is ', card);
+    }
 
     return sigString;
     
@@ -110,24 +119,48 @@ async function getMedsList(){
         medsList.push(`'${meds[i].generic}'`);// which will be sent to the front end for the autocomplete function
         
     }
-    console.log('medsList is', medsList)
+    
     return [medsList]
 
 }
 function getQuantity(){
-    const quantityIndex = getRandNum(3);
+    const quantityIndex = getRandNum(3,Math.round(Math.random()));
     const quantities = [30, 60, 90,180];
     return quantities[quantityIndex];
 }
-function getRandNum(num){
-    return Math.floor(Math.random()*num) *Math.round(Math.random());
+function getRandNum(num, getZeroes = 1){
+    return Math.floor(Math.random()*num * getZeroes);
 }
 function checker(input, checker){
-    if (input == checker){
+
+    const stripChecker = checker.replaceAll("'","")
+   
+    if (input == stripChecker){
         return 'pass'
     }else{
         return 'fail'
     }
+}
+function sigCheckerFunct (inputSig,sigChecker){
+    //this was originally named sigChecker, but it wasn't working when I called it.
+    // Apparently it's becaue i already had a variable named sigChecker.  so it's said sigChecker wasn't a function
+    const loweredInput = inputSig.toLowerCase().trim();
+    const loweredChecker = sigChecker.toLowerCase().trim();
+    //console.log('sigCheckerFunct:','\n', loweredInput,'\n',loweredChecker, (loweredInput==loweredChecker))
+    return checker(loweredInput, loweredChecker);
+
+
+}
+
+async function getNameList(){
+    const names = await RName.find();
+    let nameList = [];
+    
+    for(i=0; i<names.length; i++){
+        nameList.push(`'${names[i].name}'`)
+        
+    }
+    return nameList
 }
 //createMergedDeck();
 //callFDA();
@@ -143,19 +176,19 @@ let request = async () => {
 }
 */
 router.get('/deckBuilder', async(req,res)=>{
-    console.log('in get deckBuilder')
+    
     res.render('deckBuilder',);
 })
 
 router.get('/deckBuilderData', async(req,res)=>{
-    console.log('in get deckBuilderData')
+ 
     const cards = await MergedDeck.find();
-   // console.log('cards in backend', cards)
+ 
     res.send(cards);
 })
 
 router.put('/deckBuilderSubmit', async(req,res)=>{
-    console.log('req.body.brand', req.body.brand)
+    
     await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
         form: req.body.form,
         route:req.body.route,
@@ -164,7 +197,16 @@ router.put('/deckBuilderSubmit', async(req,res)=>{
     
     res.redirect('deckBuilder')
 })
-
+router.get('/deckBuilderDataNames', async(req,res)=>{
+    const names = await RName.find();
+    res.send(names)
+})
+router.put('/deckBuilderNamesSubmit', async(req,res)=>{
+    await RName.findByIdAndUpdate({_id:req.body._id},{
+        name: req.body.name
+    })
+    res.redirect('deckBuilder');
+})
 
 
 
@@ -181,28 +223,21 @@ router.get('/', async(req,res)=>{
 
     const quantity = getQuantity();
     const icounter = await ICounter.findOne({_id:icountID});
-    //console.log('icounter',icounter)
-    const names = await RName.find();
-    let nameList = []
-    for(i=0; i<names.length; i++){
-        nameList.push(names.name)
-
-    }
+    
+    const nameList = await getNameList();
     
     const message = 'everything looks good so far';
     const medsList = await getMedsList();
     const card = await getCard();
     //const medIndex = getRandNum(1) // 400 because the list contains 400 names of meds. dont' need this anymore now that the card is chosen in getCard()
     const sig =await createSig(card);
-    const providerIndex = getRandNum(7);
+    const providerIndex = getRandNum(7,Math.round(Math.random()));
     
-    //console.log('meds',meds)
-    //console.log('nameList',nameList);
+
 
     res.render('index', {
         nameList, 
         message, 
-        patientCheckMessage,
         icounter,
         card,
         //medIndex
@@ -235,26 +270,23 @@ router.put('/nextPT', async(req,res)=>{
     let icounter = await ICounter.findOne({_id:icountID});
     const nameListSize = await RName.collection.countDocuments();
     patientCheck = '';
-    //console.log('namelistsize is', nameListSize)
-    //console.log('icount is', icounter.icount)
+    
 
     /********test if they counter is out of bounds  */
-    console.log('before if icount is',icounter.icount,'is greater than',nameListSize-1, icounter.icount>nameListSize-1 )
+    //console.log('before if icount is',icounter.icount,'is greater than',nameListSize-1, icounter.icount>nameListSize-1 )
     if (icounter.icount > (nameListSize - 2)){
-        console.log('inside if')
+        
         await ICounter.findByIdAndUpdate( icountID,{
                 icount : 0
     })
-        console.log('icount is after if',icounter.icount)
+        
 
     }else{
-        console.log('inside else')
-        //console.log('position_num',req.body.position_num)
-        console.log('counter is',icounter.icount)
+
     await ICounter.findByIdAndUpdate(icountID,{
         icount : req.body.position_num
     })
-        console.log('counter is',icounter.icount)
+        
     
     }
     res.redirect('/')
@@ -267,11 +299,12 @@ router.post('/submit', async(req,res)=>{
    
     const quantity = req.body.quantityChecker;
     //const medIndex =  req.body.medIndex;
-    const card =  await getcard();
+    const card =  await getCard();
+    const medsList = await getMedsList();
     const icounter = await ICounter.findOne({_id:icountID})
-    const nameList = await RName.find();
+    const nameList = await getNameList();
     const providerIndex = req.body.providerIndex;
-    console.log('req.body.providerIndex',providerIndex)
+    
 
     //form inputs
     const inputMed = req.body.inputMed;
@@ -296,7 +329,7 @@ router.post('/submit', async(req,res)=>{
     const medCheckMessage = checker(inputMed,medChecker)
     const quantityCheckMessage = checker(inputQuantity, quantityChecker);
     const providerCheckMessage = checker(inputProvider, providerChecker);
-    const sigCheckMessage = checker(inputSig, sigChecker )
+    const sigCheckMessage = sigCheckerFunct(inputSig, sigChecker );
     const npiCheckMessage = checker(inputNpi, npiChecker)
     const deaCheckMessage = checker(inputDea, deaChecker)
     
@@ -318,6 +351,7 @@ router.post('/submit', async(req,res)=>{
         medCheckMessage,
         icounter,
         card,
+        medsList,
         //medIndex, 
         quantity,
         sig, 
@@ -328,12 +362,12 @@ router.post('/submit', async(req,res)=>{
 
 
 router.put('/reset', async(req,res)=>{
-    console.log('reset is', req.body.reset);
+    
     await ICounter.findByIdAndUpdate(icountID,{
         icount : req.body.reset
     })
     icounter = await ICounter.findById(icountID);
-    console.log('counter after reset is', icounter.icount)
+    
     res.redirect('/');
 })
 

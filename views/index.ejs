@@ -232,11 +232,8 @@ input.invalid {
           </div>
           <div class="formUnit">
             <label for="inputSig">Sig
-            <select class="inputSig" name="inputSig" id="inputSig" >
-              <option>Take 1 by mouth daily</option>
-              <option>Take 1 by mouth twice daily</option>
+            <input class="inputSig" name="inputSig" id="inputSig" >
               
-            </select>
             </label>
           </div>
           <div class="formUnit">
@@ -257,7 +254,12 @@ input.invalid {
             <input type="text" name="inputDea" />
             </label>
           </div>
-          <!-- these inputs are for checking.-->
+          <!-- these inputs are for checking.  and I forgot to add how they check.
+          ok  I think what I did is that I somehow get the index(medIndex, icounter.icount)
+           number from what is sent from the backend put it here for the druglist, namelist etc. then on the
+        back end I I compare the inputs to these checkers.  so checking bascically boils down to how do I take
+      whats rendered in the prescription on the right of the screen and send it to the back to compare to the input?
+    I solved this problem by putting it in the form and hiding it.-->
           <input type="text" name='medChecker' class="checker" value="<%-card.generic %>" />
           <input type="text" class="checker" name="nameChecker" value="<%-nameList[1]%>" />
           <input type="number" class="checker" name="medIndex" value="<%#-medIndex%>" />
@@ -330,18 +332,18 @@ input.invalid {
    const meds = [<%-medsList%>]  //vs code doesn't like this but it works to create an array.
    console.log('meds',meds);
 
-const names = JSON.parse('<%-JSON.stringify(nameList) %>');
-var resultNames = [];
+const names = [<%-nameList %>];//vs code telling me my code is ugly eventhough it works
+/*var resultNames = [];
 for(var i in names){
     resultNames.push(names[i]);
 }
     console.log( 'result is',resultNames);
     console.log('result 1 is',resultNames[1]);
-
+*/
 
 
 function autocomplete(inp, arr) {
-  console.log('inside auto complete')
+  
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
@@ -437,29 +439,31 @@ document.addEventListener("click", function (e) {
     closeAllLists(e.target);
 });
 }
-autocomplete(document.getElementById("patient"), resultNames);
+autocomplete(document.getElementById("patient"), names);
 autocomplete(document.getElementById('meds'), meds);
-autocomplete(document.getElementById('inputProvider'), resultNames)
-    const submit = document.getElementById("submit");
-    console.log('inside script')
-    submit.addEventListener("click", validate);
+autocomplete(document.getElementById('inputProvider'), names)
+
+  const submit = document.getElementById("submit");
+  console.log('inside script')
+  //submit.addEventListener("click", validate);
   
-    function validate(e) {
-      e.preventDefault();
-      console.log('inside validate function')
-      const patient = document.getElementById("patient");
-      let valid = true;
-      console.log('patient.value',patient.value)
-      if (patient.value=='blank') {
-        console.log('inside if statement')
-        const nameError = document.getElementById("nameError");
-        nameError.classList.add("visible");
-        patient.classList.add("invalid");
-        nameError.setAttribute("aria-hidden", false);
-        nameError.setAttribute("aria-invalid", true);
-    }
-    submit();
-    return valid;
-  }
+  // function validate(e) {
+  //   const myForm = document.getElementById('myForm');
+  //   e.preventDefault();
+  //   console.log('inside validate function')
+  //   const patient = document.getElementById("patient");
+  //   let valid = true;
+  //   console.log('patient.value',patient.value)
+  //   if (patient.value=='blank') {
+  //     console.log('inside if statement')
+  //     const nameError = document.getElementById("nameError");
+  //     nameError.classList.add("visible");
+  //     patient.classList.add("invalid");
+  //     nameError.setAttribute("aria-hidden", false);
+  //     nameError.setAttribute("aria-invalid", true);
+  //   }
+  //   myForm.submit();
+  //   return valid;
+  // }
       </script>
 </html>
