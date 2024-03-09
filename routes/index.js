@@ -13,29 +13,106 @@ global.sigList = [
     'Take 1 by mouth twice daily',
 ]
 
-async function createSig(){
-    const card = await MergedDeck.find();
-    const numCards = await MergedDeck.countDocuments();
+//about switch statements and logical OR https://stackoverflow.com/questions/6476994/using-or-operator-in-javascript-switch-statement
+async function getAction(card){
+    //issue to resolve here. I'm getting temp sometimes.
+    console.log('in get action', card);
+    switch(card.form){
+        case 'TABLET':
+        case 'CAPSULE':
+            action = 'TAKE';
+            return action;
+        case 'SYRINGE':
+            action = "INJECT";
+            return action;
+        case 'SPRAY(S)':
+            action = 'SPRAY';
+            return action;
+        case 'PUFF(S)': 
+            action = 'Inhale';
+            return action;
+        case 'PATCH':
+        case 'CREAM':
+        case 'OINTMENT':
+            action = 'Apply';
+            return action;
+        case 'DROP(S)':
+            action = 'DROP';
+            return action;
+        default:
+            action = 'temp';
 
-    for(i=0; i<numCards; i++){
-        console.log('route and form ',card[i].route, ' ', card[i].form);
     }
+    return action;
+}
+async function getTimePeriod(card){
+    console.log('in gettimeperiod', card)
+    // issue to resolve here. I'm only getting per week and every other day. per day is not comming up. also that should be more common
+    switch(card.form){
+        case 'TABLET':
+        case 'CAPSULE':
+            periodList = ["per day","every other day","per week"]
+            break;
+        case 'SYRINGE':
+            periodList = ["per day","per week","per month"]
+            break;
+        case 'SPRAY(S)':
+        case 'PUFF(S)': 
+        case 'PATCH':
+        case 'CREAM':
+        case 'OINTMENT':
+        case 'DROP(S)':
+            periodList = ['per day']
+        default:
+            periodList=['temp'];
+         
+    }
+    let randIndex = getRandNum(periodList.length);
+    return periodList[randIndex];
     
 }
-//createSig();
-function getSig(){
-    sindex = getRandNum(sigList.length);
-    return sigList[sindex];
-}
-async function getMedsList(){
-    const rawMeds = await Card.find();
-    let medsList = [];
-    for(let i in rawMeds){
-        medsList.push(rawMeds[i].brand)
-        medsList.push(rawMeds[i].generic);
+async function createSig(card){
+    /**
+     * how to create the sig.  Pull the id from req.body._id. get route and form
+     * a sig is basically action + quantity + med.form + "by/" + med.route + rate + "time(s) per" + time period
+     */
+    console.log("in createSig", card)
+    let action = await getAction(card);
+    let quantity = 1;
+    let form = card.form;
+    let route = card.route;
+    let rate = 1
+    let timePeriod = await getTimePeriod(card);
+    const sigString = `${action}  ${quantity}  ${form} by ${route}  ${rate} times ${timePeriod}`
+    
 
+    return sigString;
+    
+}
+
+async function getCard(){
+    //this basically creates an array of the drug names
+    // i want to change it to send an entire merged card so I can use it in the 
+    // createSig() function.  Actually looks like I still need medsList for autocomplete so will create a function for that.
+    const theMeds = await MergedDeck.find();
+    
+    let cardIndex = getRandNum(198)
+    let card = theMeds[cardIndex]
+   
+    return card
+}
+
+async function getMedsList(){
+    const meds = await Card.find();
+    let medsList = [];
+     for(let i in meds){
+        medsList.push(`'${meds[i].brand}' `) //funky formating to get each medication with quotes for the array
+        medsList.push(`'${meds[i].generic}'`);// which will be sent to the front end for the autocomplete function
+        
     }
-    return medsList
+    console.log('medsList is', medsList)
+    return [medsList]
+
 }
 function getQuantity(){
     const quantityIndex = getRandNum(3);
@@ -43,7 +120,7 @@ function getQuantity(){
     return quantities[quantityIndex];
 }
 function getRandNum(num){
-    return Math.floor(Math.random()*num);
+    return Math.floor(Math.random()*num) *Math.round(Math.random());
 }
 function checker(input, checker){
     if (input == checker){
@@ -77,10 +154,18 @@ router.get('/deckBuilderData', async(req,res)=>{
     res.send(cards);
 })
 
-router.post('/deckBuilderSubmit', async(req,res)=>{
-    console.log('submitted')
+router.put('/deckBuilderSubmit', async(req,res)=>{
+    console.log('req.body.brand', req.body.brand)
+    await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
+        form: req.body.form,
+        route:req.body.route,
+        brand:req.body.brand
+    })
+    
     res.redirect('deckBuilder')
 })
+
+
 
 
 router.get('/', async(req,res)=>{
@@ -97,14 +182,20 @@ router.get('/', async(req,res)=>{
     const quantity = getQuantity();
     const icounter = await ICounter.findOne({_id:icountID});
     //console.log('icounter',icounter)
-    const nameList = await RName.find();
-    const message = 'everything looks good so far';
+    const names = await RName.find();
+    let nameList = []
+    for(i=0; i<names.length; i++){
+        nameList.push(names.name)
+
+    }
     
+    const message = 'everything looks good so far';
     const medsList = await getMedsList();
-    const medIndex = getRandNum(400) // 400 because the list contains 400 names of meds
-    const sig = getSig();
+    const card = await getCard();
+    //const medIndex = getRandNum(1) // 400 because the list contains 400 names of meds. dont' need this anymore now that the card is chosen in getCard()
+    const sig =await createSig(card);
     const providerIndex = getRandNum(7);
-    console.log('medindex',medIndex);
+    
     //console.log('meds',meds)
     //console.log('nameList',nameList);
 
@@ -113,8 +204,8 @@ router.get('/', async(req,res)=>{
         message, 
         patientCheckMessage,
         icounter,
-        medsList,
-        medIndex,
+        card,
+        //medIndex
         medCheckMessage,
         quantity,
         sig,
@@ -125,6 +216,7 @@ router.get('/', async(req,res)=>{
         quantityCheckMessage,
         providerCheckMessage,
         sigCheckMessage, 
+        medsList
     });
 
 });
@@ -174,8 +266,8 @@ router.post('/submit', async(req,res)=>{
     
    
     const quantity = req.body.quantityChecker;
-    const medIndex =  req.body.medIndex;
-    const medsList =  await getMedsList();
+    //const medIndex =  req.body.medIndex;
+    const card =  await getcard();
     const icounter = await ICounter.findOne({_id:icountID})
     const nameList = await RName.find();
     const providerIndex = req.body.providerIndex;
@@ -225,8 +317,8 @@ router.post('/submit', async(req,res)=>{
         nameList, 
         medCheckMessage,
         icounter,
-        medsList,
-        medIndex, 
+        card,
+        //medIndex, 
         quantity,
         sig, 
         providerIndex

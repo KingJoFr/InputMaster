@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        body{
+            display: grid;
+        }
+        #_id{
+            visibility: hidden;
+        }
         form{
             
             width: 50%;
@@ -16,7 +22,13 @@
       
         line-height: 40px;
         margin-bottom: 10px;
-    }
+        }
+        #counterContainer{
+            display: grid;
+            margin: 0  auto;
+        }
+    
+
     </style>
 </head>
 
@@ -26,31 +38,63 @@
 <body>
     <a href="/">home</a>
    <center> <h1>deckBuilder</h1></center>
-    <form id="myForm" name="myForm" method="POST" action="/deckBuilderSubmit">  
-        <button type="submit" id ='submitbtn' action="/deckBuilderSubmit" method='POST' form="myForm">submit</button>
-    </form>
-    <button id ="nextbtn">next</button>
-    
+   <div class="formContainer">
+        <form id="myForm" name="myForm" method="POST" action="/deckBuilderSubmit?_method=PUT">  
+            <button type="submit" id ='submitbtn' form="myForm">submit</button>
+            
+        </form>
+        <button id ="nextbtn">next</button>
+            <button id ="prevbtn">prev</button>
+    </div>
+    <div id="counterContainer">
+        <button id="countbtn">update Count</button>
+    </div>
 </body>
 
 
 <script type="text/javascript">
    // const cardDeck = JSON.parse('<%#-JSON.stringify(cards) %>')
-   sessionStorage.setItem('count',0);
-    let counter = parseInt(sessionStorage.getItem('count'), 10);
-    console.log('counter',typeof(counter), counter )
 
+   sessionStorage.setItem('count',0);
+    var counter = parseInt(sessionStorage.getItem('count'), 10)
+
+    
+
+
+   document.getElementById('countbtn').onclick = function(){
+            let inputCount = document.getElementById('countInput').value;
+            
+            sessionStorage.setItem('count', inputCount);
+            counter = parseInt(sessionStorage.getItem('count'));
+            renderForm();
+            
+
+   }
+   function updateCounter(){
+    let countInput = document.getElementById('countInput')
+    countInput.value = '';
+    countInput.setAttribute('placeholder',counter)
+
+   }
+
+   function showCounter(){
+    
+    let counterContainer = document.getElementById('counterContainer');
+    let countInput = document.createElement('input');
+    countInput.setAttribute('id', 'countInput')
+    countInput.setAttribute('placeholder', counter);
+    counterContainer.appendChild(countInput);
+   }
   
 
-   async function fillForm(){
+   async function renderForm(){
    
 
     const response = await fetch('http://localhost:3000/deckBuilderData')
     const cardDeck = await response.json();
-    console.log('counter,',counter)
+    const deckLen = cardDeck.length;
+    console.log('decklen,', deckLen);
     const card = cardDeck[counter];
-
-    
     
     
     const len = Object.keys(card).length;
@@ -67,7 +111,7 @@
             element.remove();
         }
     }
-    for(let i = 1; i<len -1; i++){
+    for(let i = 0; i<len -1; i++){
       let lineBreak = document.createElement('br');
       let gen = document.createElement('input');
       let genLabel = document.createElement('label');
@@ -76,26 +120,61 @@
       gen.setAttribute('type','text')
       gen.setAttribute('placeholder',val)
       gen.setAttribute('name',key)
+      
+      gen.setAttribute('value', val)  
       console.log('key is ', key)
+      genLabel.setAttribute('id',key)
       genLabel.textContent = key;
       genLabel.appendChild(gen)
       mForm.appendChild(genLabel);
       mForm.appendChild(lineBreak);
        
     }
+    document.getElementById('nextbtn').onclick = function(){
+        counter = parseInt(sessionStorage.getItem('count'), 10)
+        if(counter>= deckLen){
+            console.log('you\'ve reached the end of the list');
+            
+        }else{
+             sessionStorage.setItem('count', counter + 1);
+            
+        }
+       
+        counter = parseInt(sessionStorage.getItem('count'),10)
+        
+        renderForm();
+        updateCounter();
+   }
    
    }
-   document.getElementById('submitbtn').onclick = function(){
+   /*document.getElementById('submitbtn').onclick = function(){
         let mForm = document.getElementById('myForm');
         mForm.submit();
-   }
-   document.getElementById('nextbtn').onclick = function(){
+   }*/
+   /*document.getElementById('nextbtn').onclick = function(){
         counter = parseInt(sessionStorage.getItem('count'), 10)
         sessionStorage.setItem('count', counter + 1);
-        console.log('counter',counter)
-        fillForm();
-   }
- 
-fillForm();
+        counter = parseInt(sessionStorage.getItem('count'),10)
+        
+        renderForm();
+        updateCounter();
+   }*/
+   document.getElementById('prevbtn').onclick = function(){
+        counter = parseInt(sessionStorage.getItem('count'), 10)
+        
+        if(counter<= 0){
+            console.log('youre already at beginning of list');
+            sessionStorage.setItem('count', 0);
+        }else{
+            sessionStorage.setItem('count', counter - 1)
+            
+        }
+        counter = parseInt(sessionStorage.getItem('count'),10)
+        renderForm();
+        updateCounter();
+    }
+   
+showCounter();
+renderForm();
 </script>
 </html>

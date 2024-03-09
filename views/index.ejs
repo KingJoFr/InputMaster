@@ -206,7 +206,7 @@ input.invalid {
     <p>npi check: <%=npiCheckMessage%></p>
     <p>dea check: <%=deaCheckMessage%></p>
     </div>
-    <div class="inputAppContainer">
+    <div class="inputAppContainer"><!-- this is on the left of the screen-->
       <div class="formContainer">
         <form class="formInput" action="/submit" method="POST" id="formInput">
           <div class="formUnit">
@@ -257,25 +257,25 @@ input.invalid {
             <input type="text" name="inputDea" />
             </label>
           </div>
-         
-          <input type="text" name='medChecker' class="checker" value="<%-medsList[medIndex] %>" />
-          <input type="text" class="checker" name="nameChecker" value="<%-nameList[icounter.icount]['name']%>" />
-          <input type="number" class="checker" name="medIndex" value="<%-medIndex%>" />
+          <!-- these inputs are for checking.-->
+          <input type="text" name='medChecker' class="checker" value="<%-card.generic %>" />
+          <input type="text" class="checker" name="nameChecker" value="<%-nameList[1]%>" />
+          <input type="number" class="checker" name="medIndex" value="<%#-medIndex%>" />
           <input type="number" class="checker" name="quantityChecker" value="<%=quantity%>" />
           <input type="text" class="checker" name="sigChecker" value="<%=sig%>" />
-          <input type="text" class="checker" name="providerChecker" value="<%=nameList[providerIndex]['name']%>" />
+          <input type="text" class="checker" name="providerChecker" value="<%=nameList[providerIndex]%>" />
           <input type="number" class="checker" name="providerIndex" value="<%=providerIndex%>" />
 
          
         </form>
         
-        <div class="rxContainer">
-          <p>Patient: <%-nameList[icounter.icount]['name']%></p><br />
+        <div class="rxContainer"><!--this is on the right of the screen-->
+          <p>Patient: <%-nameList[1]%></p><br />
            <!--<p>Birth Date:<%#=nameList[icounter.icount]['birthday']%></p><br />-->
-           <p>Medication: <%=medsList[medIndex] %></p><br />
+           <p>Medication: <%=card.generic %></p><br />
            <p >Quantity: <%=quantity%></p><br />
            <p>Sig: <%=sig%></p><br />
-           <p>Provider: <%=nameList[providerIndex]['name']%></p><br />
+           <p>Provider: <%=nameList[providerIndex]%></p><br />
            <p>NPI: 10********</p><br />
            <p>DEA: TL*******</p><br />
            <div class="submitctn">
@@ -305,7 +305,7 @@ input.invalid {
   
   </body>
   <script type ="text/javascript">
-    
+    //I was deleting medslist to replace with card. forgot that I actually need a list for the autocomplete function.
     function beforeSub(){
             console.log('inside beforesub')
       const myForm = document.getElementById('myform');
@@ -327,21 +327,21 @@ input.invalid {
            console.log('after increment',position_num.value)
    }
 
-   const meds = JSON.parse('<%-JSON.stringify(medsList) %>')
+   const meds = [<%-medsList%>]  //vs code doesn't like this but it works to create an array.
    console.log('meds',meds);
 
-   const names = JSON.parse('<%-JSON.stringify(nameList) %>');
-   var resultNames = [];
-
-
-
+const names = JSON.parse('<%-JSON.stringify(nameList) %>');
+var resultNames = [];
 for(var i in names){
-    resultNames.push(names[i].name);
+    resultNames.push(names[i]);
 }
     console.log( 'result is',resultNames);
     console.log('result 1 is',resultNames[1]);
 
+
+
 function autocomplete(inp, arr) {
+  console.log('inside auto complete')
   /*the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
@@ -423,8 +423,8 @@ function autocomplete(inp, arr) {
     }
   }
   function closeAllLists(elmnt) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
+   /* close all autocomplete lists in the document,
+    except the one passed as an argument: */
     var x = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < x.length; i++) {
       if (elmnt != x[i] && elmnt != inp) {
@@ -440,7 +440,7 @@ document.addEventListener("click", function (e) {
 autocomplete(document.getElementById("patient"), resultNames);
 autocomplete(document.getElementById('meds'), meds);
 autocomplete(document.getElementById('inputProvider'), resultNames)
-   /* const submit = document.getElementById("submit");
+    const submit = document.getElementById("submit");
     console.log('inside script')
     submit.addEventListener("click", validate);
   
@@ -460,6 +460,6 @@ autocomplete(document.getElementById('inputProvider'), resultNames)
     }
     submit();
     return valid;
-  }*/
+  }
       </script>
 </html>
