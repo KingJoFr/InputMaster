@@ -73,7 +73,7 @@ async function getTimePeriod(card){
     
 }
 async function createSig(card){
-    console.log('inside createSig');
+    
     /**
      * how to create the sig.  Pull the id from req.body._id. get route and form
      * a sig is basically action + quantity + med.form + "by/" + med.route + rate + "time(s) per" + time period
@@ -84,10 +84,10 @@ async function createSig(card){
      * while pills will be 1,2,3,4 a day or 2 times a day or whatever. but basically what I'm trying to say 
      * is they can't pull from the same array of quantities. I could probably use the form or route to decide which 
      * array of quantities to pull from.*/
-    console.log("card.use", (card.use));
-    console.log(card);
+    
+
   if(card.sig){
-    console.log(card.sig);
+    
     const sig = card.use
      return sig
   }else{
@@ -98,12 +98,12 @@ async function createSig(card){
     let rate = 1
     let timePeriod = await getTimePeriod(card);
     const sigString = `${action} ${quantity} ${form} ${route} ${rate} time(s) ${timePeriod}`;
-    console.log('inner', sigString)
+    
     if(action=='temp' || timePeriod =='temp'){
         console.log('we have temps and card is ', card);
     }
     return sigString;
-}   console.log("outer", sigString);
+}   
    
     
 }
@@ -199,11 +199,45 @@ router.get('/deckBuilderData', async(req,res)=>{
 
 router.put('/deckBuilderSubmit', async(req,res)=>{
     //submits changes to card
+    //have to check which sig changing.  sig one if it already has a sig in database. Sig2 if it doesn't already have sig
+    let sig1 = req.body.sig;
+    let sig2 = req.body.sig2;
+    if(sig1){
+        console.log('in sig 1')
     await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
         form: req.body.form,
+        generic: req.body.generic,
+        brand: req.body.brand,
+        use: req.body.use,
+        dea_class:req.body.dea_class,
         route:req.body.route,
-        brand:req.body.brand
+        sig:req.body.sig
     })
+    }else if(sig2){
+        console.log('in sig 2')
+        await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
+            form: req.body.form,
+            generic: req.body.generic,
+            brand: req.body.brand,
+            use: req.body.use,
+            dea_class:req.body.dea_class,
+            route:req.body.route,
+            sig:req.body.sig2
+        })
+        
+    }else{ // if you don't want to put a sig
+        console.log('in no sig')
+        await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
+            form: req.body.form,
+            generic: req.body.generic,
+            brand: req.body.brand,
+            use: req.body.use,
+            dea_class:req.body.dea_class,
+            route:req.body.route,
+            
+        })
+
+    }
     
     res.redirect('deckBuilder')
 })
@@ -222,8 +256,10 @@ router.put('/deckBuilderNamesSubmit', async(req,res)=>{
 
 router.get('/deckBuilderSearch', async(req,res)=>{
     // about search https://stackoverflow.com/questions/65067626/search-bar-get-request-using-express plus chatgpt
-    const searchItem = req.query.searchItem // get query items
+    const searchItem = req.query.q // get query items. Remember the q matches the q in ?q=
+    
     const card = await MergedDeck.findOne({$text:{$search:`${searchItem}`}});
+    //console.log('called from deckbuildersearch',card);
     res.send(card);
 })
 //*******************************card creator routes *******************************/
@@ -233,13 +269,13 @@ router.get('/cardCreator', async(req,res)=>{
 
 router.get("/dummyCard", async(req,res)=>{
     const card = await MergedDeck.findOne({generic:"dummyCard"});
-    console.log('card',card)
+
     res.send(card);
 })
 
 router.post("/cardCreatorSubmit",async(req,res)=>{
 
-  
+    const sig2 = req.body.sig2
     const generic = req.body.generic;
     const brand = req.body.brand;
     const use = req.body.use;
@@ -257,9 +293,24 @@ router.post("/cardCreatorSubmit",async(req,res)=>{
         "route": route,
         "sig": sig
     }
-    console.log('newcard with sig', newCard)
+    console.log('sig is defined')
+    await MergedDeck.create(newCard);
     res.redirect('cardCreator')
+}else if(sig2){
+    console.log('sig2 is defined')
+    const newCard = {
+        "generic": generic,
+        "brand": brand,
+        "use": use,
+        "dea_class": dea_class,
+        "form": form,
+        "route": route,
+        "sig": sig2
+    }
+    res.redirect('cardCreator')
+    await MergedDeck.create(newCard);
 } else{
+    console.log('no sig is defined')
     const newCard = {
 
         "generic": generic,
@@ -269,13 +320,13 @@ router.post("/cardCreatorSubmit",async(req,res)=>{
         "form": form,
         "route": route,
     }
-    console.log('newCard', newCard);
+    await MergedDeck.create(newCard);
     res.redirect('cardCreator')
     
 }
 
-    //await MergedDeck.createOne(newCard);
-    //const checkCard = await MergedDeck.findOne({generic:`${generic}`});
+   
+    const checkCard = await MergedDeck.findOne({generic:`${generic}`});
     //console.log('checkCard', checkCard)
 })
 
@@ -302,7 +353,7 @@ router.get('/', async(req,res)=>{
     const card = await getCard();
     //const medIndex = getRandNum(1) // 400 because the list contains 400 names of meds. dont' need this anymore now that the card is chosen in getCard()
     const sig =await createSig(card);
-    console.log('create sig called');
+    
     const providerIndex = getRandNum(7,Math.round(Math.random()));
     
 

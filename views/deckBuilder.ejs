@@ -11,8 +11,8 @@
         #_id{
             visibility: hidden;
         }
-        form{
-            
+        .formContainer{
+            display:grid;
             width: 50%;
             margin: 0 auto;
         }
@@ -27,7 +27,22 @@
             display: grid;
             margin: 0  auto;
         }
-    
+        .btnContainer{
+            display:grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            margin: 10px;
+        }
+        button{
+            margin: 0 auto;
+        }
+        .counterContainer{
+            margin: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+        .searchContainer{
+            margin: 10px auto;
+        }
 
     </style>
 </head>
@@ -37,25 +52,30 @@
 <!--To do mar 6. can now submit form so now need to create the put route to update the card info from the form inputs-->
 <body>
     <a href="/">home</a>
-   <center> <h1>deckBuilder</h1></center>
+   <center> <h1>Card Editor</h1></center>
 <!------------------------search------------------------->
-   <div class="searchContainer">
-    <form name="searchForm" id="searchForm" action="/deckBuilderSearch">
-        <input type="text" name="searchItem" id="searchItem" placeholder="search a drug" />
-        <button type="submit">search</button> 
-    </form>
-   </div>
+   
    <div class="formContainer">
         <form id="myForm" name="myForm" method="POST" action="/deckBuilderSubmit?_method=PUT">  
             <button type="submit" id ='submitbtn' form="myForm">submit</button>
             
         </form>
-        <button id ="nextbtn">next</button>
+        <div class="btnContainer">
+            <button id ="nextbtn">next</button>
             <button id ="prevbtn">prev</button>
+            <div id="counterContainer" class="counterContainer">
+                <button id="countbtn">update Count</button>
+            </div>
+        </div>
     </div>
-    <div id="counterContainer">
-        <button id="countbtn">update Count</button>
-    </div>
+    
+
+    <div class="searchContainer">
+        <form name="searchForm" id="searchForm" action="/deckBuilderSearch">
+            <input type="text" name="searchItem" id="searchItem" placeholder="search a drug" />
+            <button type="submit">search</button> 
+        </form>
+       </div>
 </body>
 
 
@@ -107,7 +127,7 @@
     const response = await fetch('http://localhost:3000/deckBuilderData')
     const cardDeck = await response.json();
     const deckLen = cardDeck.length;
-    console.log('decklen,', deckLen);
+    
     const card = pickCardValue(cardDeck,searchedCard,counter)
     
     
@@ -125,7 +145,7 @@
             element.remove();
         }
     }
-    for(let i = 0; i<len -1; i++){
+    for(let i = 0; i<len ; i++){
       let lineBreak = document.createElement('br');
       let gen = document.createElement('input');
       let genLabel = document.createElement('label');
@@ -136,7 +156,7 @@
       gen.setAttribute('name',key)
       
       gen.setAttribute('value', val)  
-      console.log('key is ', key)
+      
       genLabel.setAttribute('id',key)
       genLabel.textContent = key;
       genLabel.appendChild(gen)
@@ -189,8 +209,23 @@
     }
     const searchForm = document.getElementById('searchForm').addEventListener('submit', async (e)=>{
         e.preventDefault();
+        console.log('entered searchform')
         const searchedCard = await searchCard();
+        console.log('search card complete')
         await renderForm(searchedCard);
+        let myForm = document.getElementById('myForm')
+        let sig2Label = document.createElement('label');
+        let sig2Input = document.createElement('input');
+       
+        sig2Label.setAttribute('for','sig2')
+        sig2Label.textContent = "sig2";
+        sig2Input.setAttribute("name","sig2")
+        sig2Input.setAttribute("placeholder","sig2");
+        sig2Input.setAttribute('type','text');
+        sig2Label.appendChild(sig2Input);
+        myForm.appendChild(sig2Label);
+        console.log('append sig2 complete')
+        
     })
 
 async function searchCard(){

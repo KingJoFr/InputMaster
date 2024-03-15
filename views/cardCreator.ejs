@@ -41,7 +41,7 @@
     <a href="/">home</a>
     <a href="/deckBuilder" method="GET">deckBuilder</a>
 
-   <center> <h1>cardCreator</h1></center>
+   <center> <h1>Card Creator</h1></center>
    <!------------------search box------------------->
    <div class="searchContainer">
     <form name="searchForm" id="searchForm" >
@@ -77,6 +77,34 @@
     }
    })
 */
+
+async function searchCard(){//called by const searchForm
+    const searchItem = document.getElementById('searchItem').value;
+    console.log('searchItem: ', searchItem)
+    const response = await fetch(`http://localhost:3000/deckBuilderSearch?q=${searchItem}`)
+    const searchedCard = await response.json();
+    
+
+    return searchedCard
+}
+const searchForm = document.getElementById('searchForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const searchedCard = await searchCard();
+        await renderForm(searchedCard);
+        //<label for="sig2">sig2<input type="text" id="sig2" name="sig2" placeholder="sig2"></label>
+        let myForm = document.getElementById('myForm')
+        let sig2Label = document.createElement('label');
+        let sig2Input = document.createElement('input');
+       
+        sig2Label.setAttribute('for','sig2')
+        sig2Label.textContent = "sig2";
+        sig2Input.setAttribute("name","sig2")
+        sig2Input.setAttribute("placeholder","sig2");
+        sig2Input.setAttribute('type','text');
+        sig2Label.appendChild(sig2Input);
+        myForm.appendChild(sig2Label);
+
+    })
    sessionStorage.setItem('count',0);
     var counter = parseInt(sessionStorage.getItem('count'), 10)
 
@@ -107,16 +135,24 @@
     countInput.setAttribute('placeholder', counter);
     counterContainer.appendChild(countInput);
    }
+   function pickCardValue(searchedCard, dummyCard){
+    if(searchedCard){
+        return searchedCard
+    }else{
+        return dummyCard
+    }
+
+   }
   
 
-   async function renderForm(){
+   async function renderForm(searchedCard){
    
 
     const response = await fetch('http://localhost:3000/dummyCard')
-    const card = await response.json();
+    const dummyCard = await response.json();
     //const deckLen = cardDeck.length;
     //console.log('decklen,', deckLen);
-    console.log('card',card)
+    const card = pickCardValue(searchedCard,dummyCard)
     
     
     const len = Object.keys(card).length;
@@ -144,7 +180,7 @@
       gen.setAttribute('name',key)
       
       gen.setAttribute('value', val)  
-      console.log('key is ', key)
+      
       genLabel.setAttribute('id',key)
       genLabel.textContent = key;
       genLabel.appendChild(gen)
