@@ -73,6 +73,7 @@ async function getTimePeriod(card){
     
 }
 async function createSig(card){
+    console.log('inside createSig');
     /**
      * how to create the sig.  Pull the id from req.body._id. get route and form
      * a sig is basically action + quantity + med.form + "by/" + med.route + rate + "time(s) per" + time period
@@ -83,19 +84,27 @@ async function createSig(card){
      * while pills will be 1,2,3,4 a day or 2 times a day or whatever. but basically what I'm trying to say 
      * is they can't pull from the same array of quantities. I could probably use the form or route to decide which 
      * array of quantities to pull from.*/
-  
+    console.log("card.use", (card.use));
+    console.log(card);
+  if(card.sig){
+    console.log(card.sig);
+    const sig = card.use
+     return sig
+  }else{
     let action = await getAction(card);
     let quantity = 1;
     let form = card.form;
     let route = card.route;
     let rate = 1
     let timePeriod = await getTimePeriod(card);
-    const sigString = `${action} ${quantity} ${form} ${route} ${rate} time(s) ${timePeriod}`
+    const sigString = `${action} ${quantity} ${form} ${route} ${rate} time(s) ${timePeriod}`;
+    console.log('inner', sigString)
     if(action=='temp' || timePeriod =='temp'){
         console.log('we have temps and card is ', card);
     }
-
     return sigString;
+}   console.log("outer", sigString);
+   
     
 }
 
@@ -175,20 +184,21 @@ let request = async () => {
     dataName = data.name;
 }
 */
+/*********************************deck Builder routes ***************************************8*/
 router.get('/deckBuilder', async(req,res)=>{
     
     res.render('deckBuilder',);
 })
 
 router.get('/deckBuilderData', async(req,res)=>{
- 
+    //calls the deck of cards
     const cards = await MergedDeck.find();
  
     res.send(cards);
 })
 
 router.put('/deckBuilderSubmit', async(req,res)=>{
-    
+    //submits changes to card
     await MergedDeck.findByIdAndUpdate({_id: req.body._id}, {
         form: req.body.form,
         route:req.body.route,
@@ -198,18 +208,79 @@ router.put('/deckBuilderSubmit', async(req,res)=>{
     res.redirect('deckBuilder')
 })
 router.get('/deckBuilderDataNames', async(req,res)=>{
+    //to get list of patient names
     const names = await RName.find();
     res.send(names)
 })
 router.put('/deckBuilderNamesSubmit', async(req,res)=>{
+    //to edit patient names
     await RName.findByIdAndUpdate({_id:req.body._id},{
         name: req.body.name
     })
     res.redirect('deckBuilder');
 })
 
+router.get('/deckBuilderSearch', async(req,res)=>{
+    // about search https://stackoverflow.com/questions/65067626/search-bar-get-request-using-express plus chatgpt
+    const searchItem = req.query.searchItem // get query items
+    const card = await MergedDeck.findOne({$text:{$search:`${searchItem}`}});
+    res.send(card);
+})
+//*******************************card creator routes *******************************/
+router.get('/cardCreator', async(req,res)=>{
+    res.render('cardCreator');
+})
+
+router.get("/dummyCard", async(req,res)=>{
+    const card = await MergedDeck.findOne({generic:"dummyCard"});
+    console.log('card',card)
+    res.send(card);
+})
+
+router.post("/cardCreatorSubmit",async(req,res)=>{
+
+  
+    const generic = req.body.generic;
+    const brand = req.body.brand;
+    const use = req.body.use;
+    const dea_class = req.body.dea_class;
+    const form = req.body.form;
+    const sig = req.body.sig;
+    const route =req.body.route;
+    if(sig){
+    const newCard = {
+        "generic": generic,
+        "brand": brand,
+        "use": use,
+        "dea_class": dea_class,
+        "form": form,
+        "route": route,
+        "sig": sig
+    }
+    console.log('newcard with sig', newCard)
+    res.redirect('cardCreator')
+} else{
+    const newCard = {
+
+        "generic": generic,
+        "brand": brand,
+        "use": use,
+        "dea_class": dea_class,
+        "form": form,
+        "route": route,
+    }
+    console.log('newCard', newCard);
+    res.redirect('cardCreator')
+    
+}
+
+    //await MergedDeck.createOne(newCard);
+    //const checkCard = await MergedDeck.findOne({generic:`${generic}`});
+    //console.log('checkCard', checkCard)
+})
 
 
+/*****************************main routes************************************************* */
 router.get('/', async(req,res)=>{
 
     //check messages
@@ -231,6 +302,7 @@ router.get('/', async(req,res)=>{
     const card = await getCard();
     //const medIndex = getRandNum(1) // 400 because the list contains 400 names of meds. dont' need this anymore now that the card is chosen in getCard()
     const sig =await createSig(card);
+    console.log('create sig called');
     const providerIndex = getRandNum(7,Math.round(Math.random()));
     
 

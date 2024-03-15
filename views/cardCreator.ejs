@@ -27,7 +27,9 @@
             display: grid;
             margin: 0  auto;
         }
-    
+        #searchForm{
+            margin: 10px auto;
+        }
 
     </style>
 </head>
@@ -37,17 +39,21 @@
 <!--To do mar 6. can now submit form so now need to create the put route to update the card info from the form inputs-->
 <body>
     <a href="/">home</a>
-   <center> <h1>deckBuilder</h1></center>
-<!------------------------search------------------------->
+    <a href="/deckBuilder" method="GET">deckBuilder</a>
+
+   <center> <h1>cardCreator</h1></center>
+   <!------------------search box------------------->
    <div class="searchContainer">
-    <form name="searchForm" id="searchForm" action="/deckBuilderSearch">
+    <form name="searchForm" id="searchForm" >
         <input type="text" name="searchItem" id="searchItem" placeholder="search a drug" />
         <button type="submit">search</button> 
     </form>
    </div>
+   
+   <!-------------------card form--------------------->
    <div class="formContainer">
-        <form id="myForm" name="myForm" method="POST" action="/deckBuilderSubmit?_method=PUT">  
-            <button type="submit" id ='submitbtn' form="myForm">submit</button>
+        <form id="myForm" name="myForm" method="POST" action="/cardCreatorSubmit">  
+            <button type="submit" id ='submitbtn' form="myForm" >submit</button>
             
         </form>
         <button id ="nextbtn">next</button>
@@ -56,12 +62,21 @@
     <div id="counterContainer">
         <button id="countbtn">update Count</button>
     </div>
+
+  
 </body>
 
 
 <script type="text/javascript">
    // const cardDeck = JSON.parse('<%#-JSON.stringify(cards) %>')
-   // todo. update counter to match the index of the search item.
+   /*const myForm = document.getElementById('searchForm').addEventListener('submit', async(e)=>{
+    e.preventDefault;
+    const searchItem = document.getElementById('searchItem').value;
+    try{
+        const response = await fetch(`/deckBuilderSearch?q=${searchItem}`)
+    }
+   })
+*/
    sessionStorage.setItem('count',0);
     var counter = parseInt(sessionStorage.getItem('count'), 10)
 
@@ -92,23 +107,16 @@
     countInput.setAttribute('placeholder', counter);
     counterContainer.appendChild(countInput);
    }
-   function pickCardValue(cardDeck, searchedCard, counter){
-    if(searchedCard){
-        return cardDeck.find((card)=> card.generic == searchedCard)
-    }else{
-        return cardDeck[counter]
-    }
+  
 
-   }
-
-   async function renderForm(searchedCard){
+   async function renderForm(){
    
 
-    const response = await fetch('http://localhost:3000/deckBuilderData')
-    const cardDeck = await response.json();
-    const deckLen = cardDeck.length;
-    console.log('decklen,', deckLen);
-    const card = pickCardValue(cardDeck,searchedCard,counter)
+    const response = await fetch('http://localhost:3000/dummyCard')
+    const card = await response.json();
+    //const deckLen = cardDeck.length;
+    //console.log('decklen,', deckLen);
+    console.log('card',card)
     
     
     const len = Object.keys(card).length;
@@ -125,7 +133,7 @@
             element.remove();
         }
     }
-    for(let i = 0; i<len -1; i++){
+    for(let i = 0; i<len ; i++){
       let lineBreak = document.createElement('br');
       let gen = document.createElement('input');
       let genLabel = document.createElement('label');
@@ -187,19 +195,6 @@
         renderForm();
         updateCounter();
     }
-    const searchForm = document.getElementById('searchForm').addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        const searchedCard = await searchCard();
-        await renderForm(searchedCard);
-    })
-
-async function searchCard(){
-    const searchedCard = document.getElementById('searchItem').value;
-    //const response = fetch('http://localhost:3000/deckBuilderSearch')
-    //const searchedCard = response.json();
-
-    return searchedCard
-}
    
 showCounter();
 renderForm();

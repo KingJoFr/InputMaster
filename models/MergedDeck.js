@@ -33,6 +33,10 @@ const MCardSchema = new Schema({
         type: String,
         required: false
     },
+    sig:{
+        type: String,
+        required: false
+    }
     
 
 }, {strict: false});

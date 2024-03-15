@@ -196,6 +196,7 @@ input.invalid {
   </head>
   <body>
     <a href="/deckBuilder"  method="GET">deckBuilder</a>
+    <a href="/cardCreator" method="GET">cardCreator</a>
     <center><h1>Input Master v0.5</h1></center>
     <div class="allChecks">
     <p>pt check: <%=patientCheckMessage%></p>
@@ -330,7 +331,7 @@ input.invalid {
    }
 
    const meds = [<%-medsList%>]  //vs code doesn't like this but it works to create an array.
-   console.log('meds',meds);
+   
 
 const names = [<%-nameList %>];//vs code telling me my code is ugly eventhough it works
 /*var resultNames = [];
